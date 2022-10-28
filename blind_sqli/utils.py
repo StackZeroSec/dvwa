@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from enum import Enum
 import string
-import urllib
+
 
 class SecurityLevel(Enum):
     LOW = "low"
@@ -16,7 +16,7 @@ class CSRFManager:
         def wrapper(*args, **kwargs):
             
             
-            user_token, url = CSRFManager.get_token(args[0]._session, args[1])
+            user_token = CSRFManager.get_token(args[0]._session, args[0].url)
             
             if user_token != None:
                 args[0].user_token = user_token["value"]
@@ -26,10 +26,11 @@ class CSRFManager:
     
     @staticmethod
     def get_token(session:requests.Session, url:str):
+        
         response = session.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         user_token = soup.find("input", {"name": "user_token"})
-        return user_token, response.url
+        return user_token
 
 class DVWASessionProxy:
     login_data = {
@@ -63,20 +64,26 @@ class DVWASessionProxy:
 
     def __enter__(self):
         
-        response = self.post(self.url, data= {**self.data, **DVWASessionProxy.login_data}) 
+        response = self.login(self.url, data= {**self.data, **DVWASessionProxy.login_data}) 
         return self
     
-    
-    def get(self, url ,headers=None, params=None):
-        response = self._session.get(url, headers=headers, params=params)
-        
+    def get(self, url ,headers=None, params=None, cookies=None):
+        response = self._session.get(url, headers=headers, params=params, cookies=cookies)
+        self.url = response.url
         return response
     
     @CSRFManager.set_csrf_token
-    def post(self, url ,headers=None, data=None):
+    def login(self, url, headers=None, data=None):
 
         response = self._session.post(url, headers=headers, data={**self.data, **data})
         
+
+    
+    def post(self, url ,headers=None, data=None, cookies=None):
+
+        response = self._session.post(url, headers=headers, data=data, cookies=cookies)
+        
+
         return response
 
     
